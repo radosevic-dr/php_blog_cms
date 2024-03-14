@@ -46,14 +46,15 @@ error_reporting(E_ALL);
                 <!-- Page Heading -->
                 <div class="row">
                     <div class="col-lg-12">
-
+                        <!-- ADD CATEGORY  -->
                         <div class="col-xs-6">
                             <form action="<?php $_SERVER['PHP_SELF'] ?>" method="POST">
                                 <?php
                                 if (isset($_POST["submit"])) {
                                     $new_category = $_POST["cat_title"];
 
-                                    $query = "INSERT INTO category('cat_title') VALUE($new_category);";
+                                    $query = "INSERT INTO category (`cat_title`) VALUES ('$new_category')";
+
 
 
                                     $qery_exec = mysqli_query($connect, $query);
@@ -65,12 +66,50 @@ error_reporting(E_ALL);
                                     }
                                 }
                                 ?>
+
                                 <div class="form-group">
                                     <label for="cat_title">Add Category</label><br>
-                                    <input clas="block form-control" type="text" name="cat_title" id="cat_title">
+                                    <input class="block form-control" type="text" name="cat_title" id="cat_title">
                                 </div>
 
                                 <div class="form-group"><input class="btn btn-primary" type="submit" value="Add" name="submit"></div>
+                            </form>
+                            <!-- EDIT CATEGORY -->
+                            <?php
+                            if (isset($_GET["edit"])) {
+                                $cat_title = $_GET["edit"];
+                            }
+
+                            if (isset($_POST["edit"])) {
+                                $new_title = $_POST["cat_title"];
+                                $cat_id = $_GET["id"];
+                                
+                                $query = "UPDATE category SET cat_title = ? WHERE id = ?";
+
+                                $stmt = mysqli_prepare($connect, $query);
+
+                                mysqli_stmt_bind_param($stmt, "si", $new_title, $cat_id);
+
+                                $update_title = mysqli_stmt_execute($stmt);
+
+                                if (!$update_title) {
+                                    echo "Greška pri ažuriranju kategorije";
+                                } else {
+                                    header("Location: $_SERVER[PHP_SELF]");
+                                }
+                            }
+
+
+                            ?>
+                            
+                            <form action="<?php $_SERVER["PHP_SELF"] ?>" method="POST" >
+                                <div class="form-group">
+                                    <label for="cat_title">EDIT Category</label><br>
+                                    <input value="<?php if (isset($cat_title)) {
+                                                        echo $cat_title;
+                                                    } ?>" class="block form-control" type="text" name="cat_title" id="cat_title">
+                                </div>
+                                <div class="form-group"><input class="btn btn-primary" type="submit" value="Edit" name="edit"></div>
                             </form>
                         </div>
 
@@ -93,6 +132,9 @@ error_reporting(E_ALL);
                                         <td>$category[cat_title]</td>
                                         <td>
                                         <a href=$_SERVER[PHP_SELF]?delete=$category[id]>DELETE</a>
+                                        </td>
+                                        <td>
+                                            <a href=$_SERVER[PHP_SELF]?edit=$category[cat_title]&id=$category[id]>EDIT</a>
                                         </td>
                                     </tr>
                                     ";
